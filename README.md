@@ -23,6 +23,6 @@
 
 见 [Projects / weibot](https://github.com/theprimone/weibot/projects/1)
 
-## 技术分享
+## 技术剖析
 
 见 [Wiki](https://github.com/theprimone/weibot/wiki)
