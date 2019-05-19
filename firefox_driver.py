@@ -22,14 +22,12 @@ def driver_initial():
     初始化浏览器对象并序列化
     :return:
     """
-    profile_dir = FIREFOX_DIR  # firefox.exe -ProfileManager -no-remote
-    profile = FirefoxProfile(profile_dir)
-    port = socket.socket(AF_INET, SOCK_STREAM)
+    client_socket = socket.socket(AF_INET, SOCK_STREAM)
     try:
         # setdefaulttimeout(1) 导致启动浏览器异常 设为较大时间 如 10 无异常
-        port.settimeout(2)
-        port.connect(('127.0.0.1', 4444))
-        port.close()
+        client_socket.settimeout(2)
+        client_socket.connect(('127.0.0.1', 4444))
+        client_socket.close()
         print('4444端口已占用，geckodriver已启动')
         return True
     except Exception as e:
@@ -44,9 +42,11 @@ def driver_initial():
         # params：要向程序传递的参数，如果打开的为文件，则为空。
         # dir：程序初始化的目录。
         # bShow：是否显示窗口。
+
+        # firefox.exe -ProfileManager -no-remote
         driver = webdriver.remote.webdriver.WebDriver(
             command_executor="http://127.0.0.1:4444",
-            browser_profile=profile,
+            browser_profile=FirefoxProfile(FIREFOX_DIR),
             desired_capabilities=DesiredCapabilities.FIREFOX
         )
         # driver.get('about:blank')
