@@ -119,4 +119,4 @@ dmypy.json
 # weibot config
 json/mine.json
 json/cookies.json
-others/
+others/browser.data
