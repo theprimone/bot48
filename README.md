@@ -1,6 +1,6 @@
 # weibot
 
-一个自动转评赞的微博 bot
+一个自动转评赞的（生个h推bot）微博 bot
 
 ## 准备工作
 
@@ -23,6 +23,6 @@
 
 见 [Projects / weibot](https://github.com/theprimone/weibot/projects/1)
 
-## 技术分享
+## 技术剖析
 
 见 [Wiki](https://github.com/theprimone/weibot/wiki)
