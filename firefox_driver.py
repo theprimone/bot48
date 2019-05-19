@@ -11,18 +11,10 @@ from selenium import webdriver
 from selenium.webdriver import FirefoxProfile
 from socket import socket, AF_INET, SOCK_STREAM
 from my_firefox import *
-from utils import is_path_exists, loads_json, dump_dict_to_json
-import sys
-sys.path.append('.')
-
-FIREFOX_DIR = './firefoxconf.selenium/'
-
-CONF_JSON = 'json/conf.json'
-COOKIES_JSON = 'json/cookies.json'
-
-WEIBO_LOGIN_URL = "https://passport.weibo.cn/signin/login"
-
-BROWSER_OBJECT_PATH = "others/browser.data"
+from utils import is_path_exists, loads_json, dump_dict_to_json, Mine
+from constants import MINE_JSON, COOKIES_JSON, WEIBO_LOGIN_URL, FIREFOX_DIR, BROWSER_OBJECT_PATH
+# import sys
+# sys.path.append('.')
 
 
 def driver_initial():
@@ -90,9 +82,6 @@ def login_weibo():
             print("帐号密码登录")
             driver_initial()
             driver = get_browser()
-            login_user = loads_json(CONF_JSON)
-            username = login_user['username']
-            password = login_user['password']
             try:
                 print('准备登陆Weibo.cn网站...')
                 driver.get(WEIBO_LOGIN_URL)
@@ -100,9 +89,9 @@ def login_weibo():
                 WebDriverWait(driver, 10).until(
                     ec.visibility_of_element_located((By.ID, "loginAction")))
                 elem_user = driver.find_element_by_id("loginName")
-                elem_user.send_keys(username)  # 用户名
+                elem_user.send_keys(Mine().username)  # 用户名
                 elem_pwd = driver.find_element_by_id("loginPassword")
-                elem_pwd.send_keys(password)  # 密码
+                elem_pwd.send_keys(Mine().password)  # 密码
 
                 elem_sub = driver.find_element_by_id("loginAction")
                 elem_sub.click()
@@ -125,11 +114,11 @@ def login_weibo():
             driver_initial()
             driver = get_browser()
             driver.delete_all_cookies()
-            driver.get("https://weibo.cn/")
+            driver.get("https://m.weibo.cn/")
             for wc in weibo_cookies:
                 wc.pop('domain')
                 driver.add_cookie(wc)
-            driver.get("https://weibo.cn/")
+            driver.get("https://m.weibo.cn/")
 
 
 def put_browser(driver):

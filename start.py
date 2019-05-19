@@ -1,4 +1,5 @@
 # coding=utf-8
+from weibo import WeiBo
 import re
 import requests
 import functools
@@ -9,14 +10,17 @@ from bs4 import BeautifulSoup
 from datetime import timedelta
 from copy import deepcopy
 
-from headers import *
-from firefox_driver import *
-from contant import *
-from utils import get_chinese_str, make_dirs, is_path_exists, dump_dict_to_json, loads_json, get_html
-from weibo import WeiBo
+from headers import firefox_request_header
+from firefox_driver import login_weibo, is_expiry_sub
+from constants import MAX_TURN_PAGE, COOKIES_JSON
+from utils import get_chinese_str, make_dirs, is_path_exists, \
+    dump_dict_to_json, loads_json, get_html, \
+    get_fcl_users, get_latest_fcl_comment_link, get_cookies, \
+    get_fcl_users_name, get_fcl_user_tag, Mine, \
+    write_latest_fcl_comment_link
 
 
-class RcledWeiboError(ValueError):
+class FcledWeiboError(ValueError):
     pass
 
 
@@ -50,9 +54,9 @@ def get_weibo_page_url_and_number(initial=1) -> iter:
 def weibos_page_parser(current_number: int, page_soup: BeautifulSoup) -> iter:
     for weibo_tag in page_soup.select('div[id^="M_"]'):
         weibo = WeiBo(weibo_tag)
-        if weibo.comment_link in get_rcled_comment_links():
-            raise RcledWeiboError(
-                f'rcled weibo: comment like is {weibo.comment_link}'
+        if weibo.comment_link == get_latest_fcl_comment_link():
+            raise FcledWeiboError(
+                f'fcled weibo: comment like is {weibo.comment_link}'
             )
         yield weibo
     if current_number >= MAX_TURN_PAGE:
@@ -64,13 +68,13 @@ def weibos_page_parser(current_number: int, page_soup: BeautifulSoup) -> iter:
 
 def weibo_filter(weibo: WeiBo) -> bool:
     content = weibo.content['text']
-    if weibo.username == get_my_nickname():
+    if weibo.username == Mine().nickname:
         return False
     elif "应援会" in weibo.username:
         return False
-    elif weibo.username in get_users_name():  # 指定昵称直接添加
+    elif weibo.username in get_fcl_users_name():  # 指定昵称直接添加
         return True
-    elif [x for x in get_users().values() if x in content]:  # 微博内容中有指定昵称
+    elif [x for x in get_fcl_users().values() if x in content]:  # 微博内容中有指定昵称
         return True
     # elif not [x for x in parser_content_blacklist if x in content]:  # 排除内容黑名单
     #     weibo_dict_list.append(weibo_dict)
@@ -96,32 +100,18 @@ def get_pretreat_page(url: str) -> BeautifulSoup:
     return soup
 
 
-def get_rcled_comment_links() -> list:
-    with open(RCL_COMMENT_LINKS, "r", encoding="utf-8") as f:
-        return [x.strip() for x in f.readlines()]
-
-
-def rcl_weibo(weibo: WeiBo) -> None:
+def fcl_weibo(weibo: WeiBo) -> None:
     print('-------' * 4)
     print("预处理消息\n{}".format(weibo.prettify()))
     print("微博链接", weibo.comment_link)
     print('-------' * 4)
     # 指定微博 或 指定微博内容
     # 可能存在刚转评赞微博出现在下一页，故排除
-    super_topic = get_super_topic(weibo.username)
+    super_topic = get_fcl_user_tag(weibo.username)
+    print('super_topic', super_topic)
     rc_code, l_code = weibo.repost_and_comment(super_topic), weibo.like()
     print("{}\t{}\t{}".format(weibo.username, rc_code, l_code))
     sleep(1)
-
-
-def get_super_topic(username: str) -> str:
-    topics = []
-    if username in get_users_name():
-        topics.append(get_users()[username])
-    # elif weibo_content:
-    #     topics = [x for x in DESTINATION_USERS_DICT.values()
-    #               if x in weibo_content]
-    return "".join(["#{}#".format(x) for x in topics])
 
 
 def get_weibo_page_headers() -> dict:
@@ -135,30 +125,15 @@ def get_cookie() -> str:
     def build_pair(cookie):
         return '{}={}'.format(cookie['name'], cookie['value'])
 
-    cookies = loads_json(COOKIES_JSON)
-    cookie_pairs = [build_pair(cookie) for cookie in cookies]
+    cookie_pairs = [build_pair(cookie) for cookie in get_cookies()]
     return "; ".join(cookie_pairs)
 
 
 def get_sub_expiry() -> int:
     def is_sub_cookie(cookie):
         return cookie['name'] == 'SUB'
-    cookies = loads_json(COOKIES_JSON)
-    sub_cookie = list(filter(is_sub_cookie, cookies))[0]
+    sub_cookie = list(filter(is_sub_cookie, get_cookies()))[0]
     return sub_cookie['expiry']
-
-
-def get_users_name() -> list:
-    dict_conf = loads_json(CONF_JSON)
-    return [x for x in dict_conf["destination_users"].keys()]
-
-
-def get_users() -> list:
-    return loads_json(CONF_JSON)['destination_users']
-
-
-def get_my_nickname() -> str:
-    return loads_json(CONF_JSON)['nickname']
 
 
 if __name__ == '__main__':
@@ -172,18 +147,21 @@ if __name__ == '__main__':
             for weibo in weibos_page_parser(current_number, page_soup):
                 if weibo_filter(weibo):
                     waiting_weibos.append(weibo)
-    except RcledWeiboError as err:
+    except FcledWeiboError as err:
+        print('-----' * 20)
         print(err)
+        print('-----' * 20)
     except ReachMaxTurnPageError as err:
+        print('-----' * 20)
         print(err)
+        print('-----' * 20)
     finally:
         print(waiting_weibos)
         for weibo in waiting_weibos[::-1]:
-            rcl_weibo(weibo)
+            fcl_weibo(weibo)
         if len(waiting_weibos) and waiting_weibos[0].comment_link:
             print(f'写入最新 comment_link: {waiting_weibos[0].comment_link}')
-            with open(RCL_COMMENT_LINKS, "w", encoding="utf-8") as f:
-                f.write(waiting_weibos[0].comment_link + "\n")  # 写入最早操作的链接
+            write_latest_fcl_comment_link(waiting_weibos[0].comment_link)
 
     # login_weibo()
     # print('Cookies 即将过期,启动图形化浏览器中...')

@@ -1,7 +1,7 @@
 import unittest
 
 from start import get_weibo_page_url_and_number, get_pretreat_page
-from contant import MAX_TURN_PAGE
+from constants import MAX_TURN_PAGE
 
 
 class TestStart(unittest.TestCase):

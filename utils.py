@@ -1,6 +1,7 @@
 import requests
 from os import path, makedirs
 from json import dump, loads
+from constants import MINE_JSON, FCL_USERS_JSON, LATEST_FCL_COMMENT_LINK_TXT, COOKIES_JSON
 
 
 def is_path_exists(path_name):  # 文件 文件夹都行
@@ -53,8 +54,7 @@ def dump_dict_to_json(dict_, path_):
 
 def loads_json(path_):
     with open(path_, 'r', encoding="utf-8") as sf:
-        json_str = loads(sf.read())
-    return json_str
+        return loads(sf.read())
 
 
 def replace_link_to_https(link):
@@ -70,7 +70,48 @@ def get_html(url, headers, encode='utf-8'):
     return r.text
 
 
+class Mine(object):
+    def __init__(self):
+        mine = loads_json(MINE_JSON)
+        self.username = mine['username']
+        self.password = mine['password']
+        self.nickname = mine['nickname']
+
+    def __str__(self):
+        return f'Mine object (username: {self.username})'
+
+    __repr__ = __str__
+
+
+def get_fcl_users() -> dict:
+    return loads_json(FCL_USERS_JSON)
+
+
+def get_fcl_users_name() -> list:
+    return [x for x in loads_json(FCL_USERS_JSON).keys()]
+
+
+def get_fcl_user_tag(username: str) -> str:
+    topics = []
+    if get_fcl_users()['username']:
+        topics.append(get_fcl_users()['username'])
+    return "".join(["#{}#".format(x) for x in topics])
+
+
+def get_latest_fcl_comment_link() -> str:
+    with open(LATEST_FCL_COMMENT_LINK_TXT, "r", encoding="utf-8") as f:
+        return f.readline().strip()
+
+
+def write_latest_fcl_comment_link(comment_link) -> str:
+    with open(LATEST_FCL_COMMENT_LINK_TXT, "w", encoding="utf-8") as f:
+        f.write(comment_link)
+
+
+def get_cookies() -> list:
+    return loads_json(COOKIES_JSON)
+
+
 if __name__ == "__main__":
-    with open("json/user.json", "r", encoding="utf-8") as f:
-        a = f.readlines()
-    print(len(a))
+    print(get_latest_fcl_comment_link())
+    print('===')

@@ -117,5 +117,6 @@ dmypy.json
 .vscode
 
 # weibot config
-json
-others
+json/mine.json
+json/cookies.json
+others/

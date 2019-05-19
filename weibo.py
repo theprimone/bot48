@@ -4,7 +4,7 @@ from bs4.element import Tag
 from bs4 import BeautifulSoup
 from copy import deepcopy
 
-from contant import NON_BMP_MAP, COOKIES_JSON
+from constants import NON_BMP_MAP, COOKIES_JSON
 from utils import replace_link_to_https, get_html, loads_json
 from headers import firefox_request_header
 
@@ -13,7 +13,7 @@ prettify_tplt = """
 ღ {username} ღ
 {content[text]}
 {pics_count}
-{rcl_panel}
+{fcl_panel}
 {repost_reason}
 """.strip()
 
@@ -26,7 +26,7 @@ class WeiBo(object):
         self.like_link = self.get_like_link()
         self.content = self.get_content()
         self.repost_reason = self.get_repost_reason()
-        self.rcl_panel = self.get_rcl_panel()
+        self.fcl_panel = self.get_fcl_panel()
         self.pics_count = self.get_pics_count()
         # self.raw_pics_link = = self.get_row_pics_link()
 
@@ -75,11 +75,11 @@ class WeiBo(object):
         # print("repost_reason -->", repost_reason)
         return repost_reason.translate(NON_BMP_MAP)
 
-    def get_rcl_panel(self):
+    def get_fcl_panel(self):
         div_list = self.__weibo.select('div')
-        rcl_panel = [x.get_text() for x in div_list[-1].select("*")[-4:]]
-        # print("rcl_panel -->", rcl_panel)
-        return " ".join(rcl_panel).translate(NON_BMP_MAP)
+        fcl_panel = [x.get_text() for x in div_list[-1].select("*")[-4:]]
+        # print("fcl_panel -->", fcl_panel)
+        return " ".join(fcl_panel).translate(NON_BMP_MAP)
 
     def get_pics_count(self):
         div_list = self.__weibo.select('div')
@@ -101,7 +101,7 @@ class WeiBo(object):
             'like_link': self.like_link,
             'content': self.content,
             'repost_reason': self.repost_reason,
-            'rcl_panel': self.rcl_panel,
+            'fcl_panel': self.fcl_panel,
             'pics_count': self.pics_count,
         }
 
