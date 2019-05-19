@@ -156,6 +156,7 @@ if __name__ == '__main__':
         print(err)
         print('-----' * 20)
     finally:
+        print(f'待转评赞共计：{len(waiting_weibos)}个')
         print(waiting_weibos)
         for weibo in waiting_weibos[::-1]:
             fcl_weibo(weibo)

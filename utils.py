@@ -93,8 +93,8 @@ def get_fcl_users_name() -> list:
 
 def get_fcl_user_tag(username: str) -> str:
     topics = []
-    if get_fcl_users()['username']:
-        topics.append(get_fcl_users()['username'])
+    if username in get_fcl_users():
+        topics.append(get_fcl_users()[username])
     return "".join(["#{}#".format(x) for x in topics])
 
 
@@ -105,7 +105,7 @@ def get_latest_fcl_comment_link() -> str:
 
 def write_latest_fcl_comment_link(comment_link) -> str:
     with open(LATEST_FCL_COMMENT_LINK_TXT, "w", encoding="utf-8") as f:
-        f.write(comment_link)
+        f.write(f'{comment_link}/n')
 
 
 def get_cookies() -> list:
