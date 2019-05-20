@@ -136,7 +136,7 @@ def get_sub_expiry() -> int:
     return sub_cookie['expiry']
 
 
-if __name__ == '__main__':
+def start() -> None:
     initial_configure()
     waiting_weibos = []
     weibo_urls = get_weibo_page_url_and_number()
@@ -167,3 +167,7 @@ if __name__ == '__main__':
     # login_weibo()
     # print('Cookies 即将过期,启动图形化浏览器中...')
     # print('登录成功即可重新获取Cookies')
+
+
+if __name__ == '__main__':
+    start()

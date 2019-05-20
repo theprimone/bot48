@@ -114,11 +114,11 @@ def login_weibo():
             driver_initial()
             driver = get_browser()
             driver.delete_all_cookies()
-            driver.get("https://m.weibo.cn/")
+            driver.get("https://weibo.cn/")
             for wc in weibo_cookies:
                 wc.pop('domain')
                 driver.add_cookie(wc)
-            driver.get("https://m.weibo.cn/")
+            driver.get("https://weibo.cn/")
 
 
 def put_browser(driver):

@@ -14,6 +14,7 @@ bs4 = "*"
 selenium = "*"
 pypiwin32 = "*"
 lxml = "*"
+apscheduler = "*"
 
 [requires]
 python_version = "3.7"
