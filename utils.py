@@ -66,7 +66,7 @@ def replace_link_to_https(link):
 def get_html(url, headers, encode='utf-8'):
     r = requests.get(url, headers=headers)
     r.encoding = encode
-    print('get', url, r.status_code)
+    print('▶ get', url, r.status_code)
     return r.text
 
 
@@ -98,14 +98,14 @@ def get_fcl_user_tag(username: str) -> str:
     return "".join(["#{}[超话]#".format(x) for x in topics])
 
 
-def get_latest_fcl_comment_link() -> str:
+def get_latest_fcl_comment_ids() -> list:
     with open(LATEST_FCL_COMMENT_LINK_TXT, "r", encoding="utf-8") as f:
-        return f.readline().strip()
+        return [line.strip() for line in f.readlines()]
 
 
-def write_latest_fcl_comment_link(comment_link) -> str:
+def write_latest_fcl_comment_ids(comment_ids: list) -> str:
     with open(LATEST_FCL_COMMENT_LINK_TXT, "w", encoding="utf-8") as f:
-        f.write(f'{comment_link}\n')
+        f.writelines([f'{id}\n' for id in comment_ids])
 
 
 def get_cookies() -> list:
@@ -113,5 +113,5 @@ def get_cookies() -> list:
 
 
 if __name__ == "__main__":
-    print(get_latest_fcl_comment_link())
+    print(get_latest_fcl_comment_ids())
     print('===')
