@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7c5c4425376bd3c46d5f816aefdb7e0cc6f4a87946a82791b1abc2fcb9967e1a"
+            "sha256": "8dece87563b6a759d346e4ca17dd7aa51ea77573f2b8681cdfa78acbd6441b82"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -53,6 +53,14 @@
             ],
             "version": "==3.0.4"
         },
+        "concurrent-log-handler": {
+            "hashes": [
+                "sha256:189dd29542b8431e26a0484ae0f3735bd2f4330e26742cc48f7d2fddff8eb94e",
+                "sha256:1a42eab8648ca038eeeb948abc7d63baf15e8adbf9bee591f977f19e14b43724"
+            ],
+            "index": "pypi",
+            "version": "==0.9.16"
+        },
         "idna": {
             "hashes": [
                 "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407",
@@ -92,12 +100,19 @@
             "index": "pypi",
             "version": "==4.3.3"
         },
+        "portalocker": {
+            "hashes": [
+                "sha256:3fb35648a9e03f267e54c6186513abbd1cdd321c305502545a3550eea8b2923f",
+                "sha256:d98cdcdbd8c590ee4c93fb4149b2e76030ea6c36d6fdfec122e6656ebf90086f"
+            ],
+            "version": "==1.4.0"
+        },
         "pypiwin32": {
             "hashes": [
                 "sha256:67adf399debc1d5d14dffc1ab5acacb800da569754fafdc576b2a039485aa775",
                 "sha256:71be40c1fbd28594214ecaecb58e7aa8b708eabfa0125c8a109ebd51edbd776a"
             ],
-            "index": "pypi",
+            "markers": "platform_system == 'Windows'",
             "version": "==223"
         },
         "pytz": {

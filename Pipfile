@@ -9,10 +9,10 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
+concurrent-log-handler = "*"
 requests = "*"
 bs4 = "*"
 selenium = "*"
-pypiwin32 = "*"
 lxml = "*"
 apscheduler = "*"
 
