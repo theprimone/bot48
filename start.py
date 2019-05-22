@@ -18,6 +18,10 @@ from utils import get_chinese_str, make_dirs, is_path_exists, \
     get_fcl_users, get_latest_fcl_comment_ids, get_cookies, \
     get_fcl_users_name, get_fcl_user_tag, Mine, \
     write_latest_fcl_comment_ids
+from logger import Logger
+
+
+LOG = Logger()
 
 
 class ParsedWeiboError(ValueError):
@@ -32,7 +36,7 @@ def initial_configure() -> None:
 def log(func):
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        print('call %s():' % func.__name__)
+        LOG.info(f'call {func.__name__}():')
         return func(*args, **kw)
     return wrapper
 
@@ -56,9 +60,11 @@ def weibos_page_parser(page_soup: BeautifulSoup) -> iter:
             )
         if not weibo_preposition_filter(weibo):
             continue
-        print(f'-> [{weibo.username}]\t{weibo.fcl_panel}')
+        LOG.info(f'-> [{weibo.username}]\t{weibo.fcl_panel}')
         yield weibo
-    sleep(randint(3, 6))
+    seconds_to_sleep = randint(3, 6)
+    LOG.info(f'page sleep: {seconds_to_sleep}s')
+    sleep(seconds_to_sleep)
 
 
 def weibo_preposition_filter(weibo: WeiBo) -> bool:
@@ -96,21 +102,17 @@ def get_pretreat_page(url: str) -> BeautifulSoup:
     div_list[-4].extract()
     div_list[-3].extract()
     div_list[-2].extract()
-    # print(soup.prettify())
+    # LOG.info(soup.prettify())
     return soup
 
 
 def fcl_weibo(weibo: WeiBo) -> None:
-    print('-------' * 20)
-    print("预处理消息\n{}".format(weibo.prettify()))
-    print("微博链接", weibo.comment_link)
-    print('-------' * 20)
-    # 指定微博 或 指定微博内容
-    # 可能存在刚转评赞微博出现在下一页，故排除
-    super_topic = get_fcl_user_tag(weibo.username)
-    print('super_topic', super_topic)
-    rc_code, l_code = weibo.repost_and_comment(super_topic), weibo.like()
-    print("✔ {}\t{}\t{}".format(weibo.username, rc_code, l_code))
+    LOG.info(f'weibo comment link: {weibo.comment_link}')
+    LOG.info(f'weibo prettify: {weibo.prettify()}')
+    tags = get_fcl_user_tag(weibo.username)
+    LOG.info(f'weibo fc tags: {tags}')
+    rc_code, l_code = weibo.repost_and_comment(tags), weibo.like()
+    LOG.info(f'✔ {weibo.username}\t{rc_code}\t{l_code}')
     sleep(1)
 
 
@@ -161,24 +163,18 @@ def start() -> None:
                 if weibo_postposition_filter(weibo):
                     waiting_weibos.append(weibo)
     except ParsedWeiboError as err:
-        print('-----' * 20)
-        print(err)
-        print('-----' * 20)
+        LOG.error(err)
     except StopIteration as err:
-        print('-----' * 20)
-        print(err.value)
-        print('-----' * 20)
+        LOG.error(err.value)
     finally:
-        print(f'待转评赞共计：{len(waiting_weibos)}个')
-        # print(waiting_weibos)
+        LOG.info(f'weibos\'s count to fcl: {len(waiting_weibos)}')
         for weibo in waiting_weibos[::-1]:
             fcl_weibo(weibo)
-        print(f'写入最新 comment_ids: {first_page_comment_ids}')
+        LOG.info(f'update latest comment_ids: {first_page_comment_ids}')
         write_latest_fcl_comment_ids(first_page_comment_ids)
 
     # login_weibo()
-    # print('Cookies 即将过期,启动图形化浏览器中...')
-    # print('登录成功即可重新获取Cookies')
+    LOG.info('cookies will expire, start brower to refresh...')
 
 
 if __name__ == '__main__':

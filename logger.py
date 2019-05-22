@@ -67,11 +67,15 @@ LOGGING_DICT = {
 }
 
 
-def get_logger(logger_name):
-    logging.config.dictConfig(LOGGING_DICT)  # 导入配置
-    return logging.getLogger(logger_name)
+class Logger(object):
+    def __init__(self, logger_name='weibot'):
+        logging.config.dictConfig(LOGGING_DICT)  # 导入配置
+        logger = logging.getLogger(logger_name)
+        self.info = logger.info
+        self.warning = logger.warning
+        self.error = logger.error
 
 
 if __name__ == "__main__":
-    logger = get_logger("weibot")
-    logger.info("hello world.")
+    logger = Logger()
+    logger.info('hello world.')
