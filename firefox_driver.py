@@ -54,7 +54,7 @@ def driver_initial():
         return False
 
 
-def is_expiry_sub():
+def will_expiry_sub():
     sub_expriy = get_sub_expriy()
     # print("Cookies 过期时间 {}".format(datetime.fromtimestamp(sub_expriy)))
     return sub_expriy <= int(time() + 2 * 60 * 60)

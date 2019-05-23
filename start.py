@@ -11,7 +11,7 @@ from datetime import timedelta
 from copy import deepcopy
 
 from headers import firefox_request_header
-from firefox_driver import login_weibo, is_expiry_sub
+from firefox_driver import login_weibo, will_expiry_sub
 from constants import MAX_TURN_PAGE, COOKIES_JSON
 from utils import get_chinese_str, make_dirs, is_path_exists, \
     dump_dict_to_json, loads_json, get_html, \
@@ -41,7 +41,7 @@ def log(func):
     return wrapper
 
 
-def get_weibo_page_url_and_number(initial=1) -> iter:
+def get_weibo_page_url(initial=1) -> iter:
     current_number = initial
     page_tplt = 'https://weibo.cn/?page={}'
     while current_number <= MAX_TURN_PAGE:
@@ -143,25 +143,32 @@ def get_weibo_id_by_comment_link(comment_link: str):
     return comment_link.split('?')[0].split('/')[-1]
 
 
+def get_page_soup() -> iter:
+    page_url = get_weibo_page_url()
+    while not will_expiry_sub():
+        current_url = next(page_url)
+        yield get_pretreat_page(current_url)
+    return 'sub cookie will expire'
+
+
+def get_page_comment_ids(soup: BeautifulSoup) -> list:
+    comment_links_tag = soup.find_all('a', text=re.compile('^评论'))
+    return [get_weibo_id_by_comment_link(tag['href']) for tag in comment_links_tag]
+
+
+def get_page_target_weibos(soup: BeautifulSoup) -> list:
+    return [weibo for weibo in weibos_page_parser(soup) if weibo_postposition_filter(weibo)]
+
+
 def start() -> None:
     initial_configure()
     waiting_weibos = []
-    weibo_urls = get_weibo_page_url_and_number()
     first_page_comment_ids = []
     try:
-        while not is_expiry_sub():  # 提前两小时重获取cookies
-            current_url = next(weibo_urls)
-            page_soup = get_pretreat_page(current_url)
+        for page_soup in get_page_soup():
             if (len(first_page_comment_ids) == 0):
-                comment_links_tag = page_soup.find_all(
-                    'a', text=re.compile('^评论')
-                )
-                first_page_comment_ids = [
-                    get_weibo_id_by_comment_link(tag['href']) for tag in comment_links_tag
-                ]
-            for weibo in weibos_page_parser(page_soup):
-                if weibo_postposition_filter(weibo):
-                    waiting_weibos.append(weibo)
+                first_page_comment_ids = get_page_comment_ids(page_soup)
+            waiting_weibos = waiting_weibos + get_page_target_weibos(page_soup)
     except ParsedWeiboError as err:
         LOG.error(err)
     except StopIteration as err:
@@ -174,7 +181,7 @@ def start() -> None:
         write_latest_fcl_comment_ids(first_page_comment_ids)
 
     # login_weibo()
-    LOG.info('cookies will expire, start brower to refresh...')
+    # LOG.info('cookies will expire, start brower to refresh...')
 
 
 if __name__ == '__main__':
