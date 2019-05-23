@@ -9,6 +9,7 @@ from random import randint
 from bs4 import BeautifulSoup
 from datetime import timedelta
 from copy import deepcopy
+from typing import Generator, List
 
 from headers import firefox_request_header
 from firefox_driver import login_weibo, will_expiry_sub
@@ -41,7 +42,7 @@ def log(func):
     return wrapper
 
 
-def get_weibo_page_url(initial=1) -> Generator[str, None, str]:
+def get_weibo_page_url(initial: int = 1) -> Generator[str, None, str]:
     current_number = initial
     page_tplt = 'https://weibo.cn/?page={}'
     while current_number <= MAX_TURN_PAGE:
@@ -143,7 +144,7 @@ def get_weibo_id_by_comment_link(comment_link: str):
     return comment_link.split('?')[0].split('/')[-1]
 
 
-def get_page_soup() -> iter:
+def get_page_soup() -> Generator[str, None, str]:
     page_url = get_weibo_page_url()
     while not will_expiry_sub():
         current_url = next(page_url)
@@ -151,12 +152,12 @@ def get_page_soup() -> iter:
     return 'sub cookie will expire'
 
 
-def get_page_comment_ids(soup: BeautifulSoup) -> list:
+def get_page_comment_ids(soup: BeautifulSoup) -> List[str]:
     comment_links_tag = soup.find_all('a', text=re.compile('^评论'))
     return [get_weibo_id_by_comment_link(tag['href']) for tag in comment_links_tag]
 
 
-def get_page_target_weibos(soup: BeautifulSoup) -> list:
+def get_page_target_weibos(soup: BeautifulSoup) -> List[WeiBo]:
     return [weibo for weibo in weibos_page_parser(soup) if weibo_postposition_filter(weibo)]
 
 

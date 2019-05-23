@@ -1,14 +1,16 @@
 import requests
 from os import path, makedirs
 from json import dump, loads
+from typing import List
+
 from constants import MINE_JSON, FCL_USERS_JSON, LATEST_FCL_COMMENT_LINK_TXT, COOKIES_JSON
 
 
-def is_path_exists(path_name):  # 文件 文件夹都行
+def is_path_exists(path_name: str) -> bool:  # 文件 文件夹都行
     return path.exists(path_name)
 
 
-def make_dirs(dirs):
+def make_dirs(dirs: str):
     """
     创建目录
     :param dirs: 目录路径，可迭代创建
@@ -29,12 +31,12 @@ def make_dirs(dirs):
 #         print('新建文件', file_path)
 
 
-def is_chinese(uchar):
+def is_chinese(uchar: chr) -> bool:
     """判断一个unicode是否是汉字"""
     return '\u4e00' <= uchar <= '\u9fa5'
 
 
-def get_chinese_str(str):
+def get_chinese_str(str: str) -> str:
     """
     得到汉字字符串
     :param str:
@@ -47,23 +49,23 @@ def get_chinese_str(str):
     return chinese_str
 
 
-def dump_dict_to_json(dict_, path_):
-    with open(path_, 'w', encoding='utf-8') as jf:  # 保存中文字符时 encoding 和 ensure_ascii 需要同时设置
-        dump(dict_, jf, ensure_ascii=False, indent=4)
+def dump_dict_to_json(_dict: dict, _path: str):
+    with open(_path, 'w', encoding='utf-8') as jf:  # 保存中文字符时 encoding 和 ensure_ascii 需要同时设置
+        dump(_dict, jf, ensure_ascii=False, indent=4)
 
 
-def loads_json(path_):
-    with open(path_, 'r', encoding="utf-8") as sf:
+def loads_json(_path: str) -> dict:
+    with open(_path, 'r', encoding="utf-8") as sf:
         return loads(sf.read())
 
 
-def replace_link_to_https(link):
+def replace_link_to_https(link: str) -> str:
     if not link.startswith('https'):
         link = link.replace('http', 'https')
     return link
 
 
-def get_html(url, headers, encode='utf-8'):
+def get_html(url: str, headers: dict, encode='utf-8') -> str:
     r = requests.get(url, headers=headers)
     r.encoding = encode
     print('▶ get', url, r.status_code)
@@ -103,12 +105,12 @@ def get_latest_fcl_comment_ids() -> list:
         return [line.strip() for line in f.readlines()]
 
 
-def write_latest_fcl_comment_ids(comment_ids: list) -> str:
+def write_latest_fcl_comment_ids(comment_ids: List[str]) -> str:
     with open(LATEST_FCL_COMMENT_LINK_TXT, "w", encoding="utf-8") as f:
         f.writelines([f'{id}\n' for id in comment_ids])
 
 
-def get_cookies() -> list:
+def get_cookies() -> List[dict]:
     return loads_json(COOKIES_JSON)
 
 

@@ -113,7 +113,7 @@ class WeiBo(object):
 
     __repr__ = __str__
 
-    def repost_and_comment(self, comment) -> int:
+    def repost_and_comment(self, comment: str) -> int:
         print('comment_link', self.comment_link)
         comment_page = get_html(self.comment_link, get_headers_with_cookie())
         comment_page_soup = BeautifulSoup(comment_page, 'lxml')
