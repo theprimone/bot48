@@ -41,7 +41,7 @@ def log(func):
     return wrapper
 
 
-def get_weibo_page_url(initial=1) -> iter:
+def get_weibo_page_url(initial=1) -> Generator[str, None, str]:
     current_number = initial
     page_tplt = 'https://weibo.cn/?page={}'
     while current_number <= MAX_TURN_PAGE:
